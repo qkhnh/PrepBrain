@@ -1,4 +1,4 @@
-import type { Suggestion, OutputStatus } from '@/types/suggestion'
+import type { Dish, OutputStatus } from '@/types/suggestion'
 import { ResultHeader } from '@/components/ResultHeader'
 import { DishSuggestionCard } from '@/components/DishSuggestionCard'
 import { IngredientTagList } from '@/components/IngredientTagList'
@@ -9,23 +9,74 @@ import { EmptyState } from '@/components/EmptyState'
 
 export interface OutputPageProps {
   status: OutputStatus
-  suggestions: Suggestion[]
+  suggestions: Dish[]
   errorMessage?: string | null
   onBackToIngredients: () => void
-  onSave?: (recipe: Suggestion) => void
+  onSave?: (recipe: Dish) => void
   onRetry?: () => void
 }
 
 const LABEL_BACK = 'Back to ingredients'
 const LABEL_SAVE = 'Save for later'
+const LABEL_APPROVE = 'Approve'
+const LABEL_ADJUST = 'Adjust'
 
-/** Single recipe card with dish name, description, ingredients, rationale, and save action */
+function ScoreSection({ dish }: { dish: Dish }) {
+  const wastePercent = Math.round(dish.wasteScore * 100)
+  return (
+    <section style={{ marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+        <span
+          style={{
+            padding: '0.2rem 0.6rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            background: 'var(--color-bg)',
+            border: '1px solid var(--color-border)',
+            color: 'var(--color-primary)',
+          }}
+        >
+          Waste cleared: {wastePercent}%
+        </span>
+        <span
+          style={{
+            padding: '0.2rem 0.6rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            background: 'var(--color-bg)',
+            border: '1px solid var(--color-border)',
+            color: 'var(--color-primary)',
+          }}
+        >
+          ~{dish.portionsToClear} portion{dish.portionsToClear !== 1 ? 's' : ''}
+        </span>
+        {dish.equipmentRequired.length > 0 && (
+          <span
+            style={{
+              padding: '0.2rem 0.6rem',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.8125rem',
+              background: 'var(--color-bg)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-muted)',
+            }}
+          >
+            {dish.equipmentRequired.join(', ')}
+          </span>
+        )}
+      </div>
+    </section>
+  )
+}
+
 function RecipeCard({
-  suggestion,
+  dish,
   onSave,
 }: {
-  suggestion: Suggestion
-  onSave?: (recipe: Suggestion) => void
+  dish: Dish
+  onSave?: (recipe: Dish) => void
 }) {
   return (
     <article
@@ -39,31 +90,61 @@ function RecipeCard({
       }}
     >
       <DishSuggestionCard
-        dishName={suggestion.dishName}
-        description={suggestion.description}
-        offMenuNote={suggestion.offMenuNote}
+        dishName={dish.name}
+        description={dish.description}
+        offMenuNote={dish.offMenuNote}
       />
-      <IngredientTagList ingredientsUsed={suggestion.ingredientsUsed} />
-      <ReasonSection rationale={suggestion.rationale} />
-      {onSave && (
-        <div style={{ marginTop: '1rem' }}>
-          <button
-            type="button"
-            onClick={() => onSave(suggestion)}
-            style={{
-              padding: '0.5rem 1rem',
-              fontSize: '0.9375rem',
-              cursor: 'pointer',
-              border: `1px solid var(--color-border)`,
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--color-surface)',
-              color: 'var(--color-text)',
-            }}
-          >
-            {LABEL_SAVE}
-          </button>
-        </div>
-      )}
+      <ScoreSection dish={dish} />
+      <IngredientTagList ingredients={dish.ingredients} />
+      <ReasonSection rationale={dish.rationale} />
+      <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          onClick={() => onSave?.(dish)}
+          style={{
+            padding: '0.5rem 1rem',
+            fontSize: '0.9375rem',
+            cursor: 'pointer',
+            border: `1px solid var(--color-border)`,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-surface)',
+            color: 'var(--color-text)',
+          }}
+        >
+          {LABEL_SAVE}
+        </button>
+        <button
+          type="button"
+          onClick={() => alert('Approved!')}
+          style={{
+            padding: '0.5rem 1rem',
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-primary)',
+            color: '#fff',
+          }}
+        >
+          {LABEL_APPROVE}
+        </button>
+        <button
+          type="button"
+          onClick={() => alert('Adjust dish — coming soon.')}
+          style={{
+            padding: '0.5rem 1rem',
+            fontSize: '0.9375rem',
+            cursor: 'pointer',
+            border: `1px solid var(--color-primary)`,
+            borderRadius: 'var(--radius-md)',
+            background: 'transparent',
+            color: 'var(--color-primary)',
+          }}
+        >
+          {LABEL_ADJUST}
+        </button>
+      </div>
     </article>
   )
 }
@@ -78,7 +159,6 @@ export function OutputPage({
 }: OutputPageProps) {
   return (
     <div style={{ padding: '1.5rem' }}>
-      {/* Back button: left-aligned at top of main content, just right of sidebar divider */}
       <div style={{ marginBottom: '1.25rem', textAlign: 'left' }}>
         <button
           type="button"
@@ -98,16 +178,10 @@ export function OutputPage({
         </button>
       </div>
 
-      {/* Centered column for header and recipe cards only */}
-      <div
-        style={{
-          maxWidth: '36rem',
-          margin: '0 auto',
-        }}
-      >
+      <div style={{ maxWidth: '36rem', margin: '0 auto' }}>
         <ResultHeader
           title="Your dish suggestions"
-          subtitle="Based on your leftover ingredients — scroll to see more"
+          subtitle="Based on your leftover ingredients — ranked by waste cleared"
         />
 
         {status === 'loading' && <LoadingState />}
@@ -124,13 +198,12 @@ export function OutputPage({
           <EmptyState onBackToIngredients={onBackToIngredients} onTryAgain={onRetry} />
         )}
 
-        {/* Scrollable list of recipe cards */}
         {status === 'success' && suggestions.length > 0 && (
           <div style={{ paddingBottom: '2rem' }}>
-            {suggestions.map((suggestion, index) => (
+            {suggestions.map((dish, index) => (
               <RecipeCard
-                key={`${suggestion.dishName}-${index}`}
-                suggestion={suggestion}
+                key={`${dish.name}-${index}`}
+                dish={dish}
                 onSave={onSave}
               />
             ))}

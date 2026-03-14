@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import type { Suggestion } from '@/types/suggestion'
+import type { Dish } from '@/types/suggestion'
 import type { OutputStatus } from '@/types/suggestion'
 import { AppNav } from '@/components/AppNav'
 import { Sidebar } from '@/components/Sidebar'
@@ -7,78 +7,37 @@ import { AuthPage } from '@/pages/AuthPage'
 import { OutputPage } from '@/pages/OutputPage'
 import PrepPage from '@/pages/PrepPage'
 import type { PrepPayload } from '@/pages/PrepPage'
-
-/** Build one mock suggestion; used to generate multiple variations (until API exists) */
-function mockSuggestionFromIngredients(ingredientNames: string[], variant = 0): Suggestion {
-  const used = ingredientNames.length > 0 ? ingredientNames : ['tomatoes', 'basil', 'eggs']
-  const first = used[0] ?? 'ingredients'
-  const names = used.slice(0, 3).join(', ')
-  const variants: Suggestion[] = [
-    {
-      dishName: `${first.charAt(0).toUpperCase() + first.slice(1)} & More Bowl`,
-      description: `A simple dish using ${names}${used.length > 3 ? ' and more' : ''}. Perfect for a quick special.`,
-      ingredientsUsed: used,
-      rationale: `Uses your leftover ${used.join(', ')} without needing new stock. Great for a limited-time special.`,
-      offMenuNote: 'Off-menu special — use while supplies last.',
-    },
-    {
-      dishName: `Kitchen Sink Frittata`,
-      description: `Hearty frittata with ${names}. Ideal for brunch or a light dinner.`,
-      ingredientsUsed: used,
-      rationale: `Eggs and your selected ingredients come together in one pan. Minimal waste, maximum flavour.`,
-      offMenuNote: 'Off-menu special — use while supplies last.',
-    },
-    {
-      dishName: `Chef’s Choice Hash`,
-      description: `Roasted hash featuring ${names}. Crispy and satisfying.`,
-      ingredientsUsed: used,
-      rationale: `Everything gets a quick roast or pan-fry. Works with whatever you have on hand.`,
-      offMenuNote: 'Off-menu special — use while supplies last.',
-    },
-    {
-      dishName: `Seasonal Bowl`,
-      description: `Bowl built around ${names}. Fresh, flexible, and easy to scale.`,
-      ingredientsUsed: used,
-      rationale: `Designed to use your current ingredients as the base. Add grains or protein as you like.`,
-      offMenuNote: 'Off-menu special — use while supplies last.',
-    },
-  ]
-  return variants[variant % variants.length]!
-}
-
-/** Number of recipe cards to show on the suggestions page (scrollable list) */
-const SUGGESTIONS_COUNT = 4
+import { runSession } from '@/lib/session'
 
 function App() {
   const [view, setView] = useState<'input' | 'output' | 'auth'>('input')
   const [status, setStatus] = useState<OutputStatus>('success')
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [suggestions, setSuggestions] = useState<Dish[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [savedRecipes, setSavedRecipes] = useState<Suggestion[]>([])
+  const [savedRecipes, setSavedRecipes] = useState<Dish[]>([])
   const prepDataRef = useRef<PrepPayload | null>(null)
 
-  const handlePrepSubmit = (data: PrepPayload) => {
+  const handlePrepSubmit = async (data: PrepPayload) => {
     prepDataRef.current = data
-    const names = data.ingredients.map((i) => i.name)
     setView('output')
     setStatus('loading')
     setSuggestions([])
     setErrorMessage(null)
 
-    // Mock API: generate multiple suggestions for scrollable list (replace with real fetch later)
-    setTimeout(() => {
-      const list = Array.from({ length: SUGGESTIONS_COUNT }, (_, i) =>
-        mockSuggestionFromIngredients(names, i)
-      )
-      setSuggestions(list)
-      setStatus('success')
-    }, 1000)
+    try {
+      const dishes = await runSession(data)
+      setSuggestions(dishes.length > 0 ? dishes : [])
+      setStatus(dishes.length > 0 ? 'success' : 'empty')
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Something went wrong.')
+      setStatus('error')
+    }
   }
 
   const handleBackToIngredients = () => setView('input')
 
-  const handleSave = (recipe: Suggestion) => {
-    const alreadySaved = savedRecipes.some((r) => r.dishName === recipe.dishName)
+  const handleSave = (recipe: Dish) => {
+    const alreadySaved = savedRecipes.some((r) => r.name === recipe.name)
     if (!alreadySaved) setSavedRecipes((prev) => [...prev, recipe])
   }
 
@@ -86,18 +45,18 @@ function App() {
     setSavedRecipes((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleRetry = () => {
+  const handleRetry = async () => {
+    const data = prepDataRef.current
+    if (!data) return
     setStatus('loading')
-    setTimeout(() => {
-      const data = prepDataRef.current
-      const names = data?.ingredients?.map((i) => i.name) ?? []
-      setSuggestions(
-        Array.from({ length: SUGGESTIONS_COUNT }, (_, i) =>
-          mockSuggestionFromIngredients(names, i)
-        )
-      )
-      setStatus('success')
-    }, 600)
+    try {
+      const dishes = await runSession(data)
+      setSuggestions(dishes.length > 0 ? dishes : [])
+      setStatus(dishes.length > 0 ? 'success' : 'empty')
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Something went wrong.')
+      setStatus('error')
+    }
   }
 
   if (view === 'auth') {

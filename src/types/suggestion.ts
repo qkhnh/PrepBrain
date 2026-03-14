@@ -7,4 +7,22 @@ export interface Suggestion {
   offMenuNote?: string
 }
 
+export interface DishIngredient {
+  name: string
+  quantity: number
+  unit: string
+  atRisk: boolean
+}
+
+export interface Dish {
+  name: string
+  description: string
+  ingredients: DishIngredient[]
+  equipmentRequired: string[]
+  wasteScore: number
+  portionsToClear: number
+  rationale: string
+  offMenuNote?: string
+}
+
 export type OutputStatus = 'loading' | 'success' | 'error' | 'empty'

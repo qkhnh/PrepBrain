@@ -1,8 +1,8 @@
-import type { Suggestion } from '@/types/suggestion'
+import type { Dish } from '@/types/suggestion'
 import styles from './Sidebar.module.css'
 
 interface SidebarProps {
-  savedRecipes: Suggestion[]
+  savedRecipes: Dish[]
   onRemoveSaved?: (index: number) => void
   onNavigateToAuth?: () => void
 }
@@ -17,10 +17,10 @@ export function Sidebar({ savedRecipes, onRemoveSaved, onNavigateToAuth }: Sideb
         ) : (
           <ul className={styles.list}>
             {savedRecipes.map((recipe, index) => (
-              <li key={`${recipe.dishName}-${index}`}>
+              <li key={`${recipe.name}-${index}`}>
                 <div className={styles.item}>
-                  <span className={styles.itemName} title={recipe.dishName}>
-                    {recipe.dishName}
+                  <span className={styles.itemName} title={recipe.name}>
+                    {recipe.name}
                   </span>
                   {onRemoveSaved && (
                     <button
@@ -28,7 +28,7 @@ export function Sidebar({ savedRecipes, onRemoveSaved, onNavigateToAuth }: Sideb
                       className={styles.removeBtn}
                       onClick={() => onRemoveSaved(index)}
                       title="Remove from saved"
-                      aria-label={`Remove ${recipe.dishName} from saved`}
+                      aria-label={`Remove ${recipe.name} from saved`}
                     >
                       ×
                     </button>

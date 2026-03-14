@@ -1,11 +1,13 @@
+import type { DishIngredient } from '@/types/suggestion'
+
 interface IngredientTagListProps {
-  ingredientsUsed: string[]
+  ingredients: DishIngredient[]
 }
 
 const SECTION_HEADING = 'Ingredients used'
 
-export function IngredientTagList({ ingredientsUsed }: IngredientTagListProps) {
-  if (!ingredientsUsed.length) return null
+export function IngredientTagList({ ingredients }: IngredientTagListProps) {
+  if (!ingredients.length) return null
 
   return (
     <section style={{ marginBottom: '1.5rem' }} aria-labelledby="ingredients-heading">
@@ -30,19 +32,25 @@ export function IngredientTagList({ ingredientsUsed }: IngredientTagListProps) {
           gap: '0.5rem',
         }}
       >
-        {ingredientsUsed.map((ing) => (
+        {ingredients.map((ing) => (
           <li
-            key={ing}
+            key={ing.name}
             style={{
               padding: '0.25rem 0.5rem',
-              background: 'var(--color-surface)',
-              border: `1px solid var(--color-border)`,
+              background: ing.atRisk ? 'var(--color-warning-bg)' : 'var(--color-surface)',
+              border: `1px solid ${ing.atRisk ? 'var(--color-warning)' : 'var(--color-border)'}`,
               borderRadius: 'var(--radius-md)',
               fontSize: '0.875rem',
-              color: 'var(--color-text)',
+              color: ing.atRisk ? 'var(--color-warning)' : 'var(--color-text)',
+              fontWeight: ing.atRisk ? 500 : 400,
             }}
           >
-            {ing}
+            {ing.name}
+            {ing.quantity > 0 && (
+              <span style={{ marginLeft: '0.25rem', opacity: 0.75 }}>
+                {ing.quantity}{ing.unit ? ` ${ing.unit}` : ''}
+              </span>
+            )}
           </li>
         ))}
       </ul>
