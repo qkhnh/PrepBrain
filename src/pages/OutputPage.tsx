@@ -95,7 +95,6 @@ function RecipeCard({
       <DishSuggestionCard
         dishName={dish.name}
         description={dish.description}
-        offMenuNote={dish.offMenuNote}
       />
       <ScoreSection dish={dish} />
       <IngredientTagList ingredients={dish.ingredients} />

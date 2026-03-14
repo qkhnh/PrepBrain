@@ -73,6 +73,7 @@ function App() {
   const [selectedRecipe, setSelectedRecipe] = useState<Dish | null>(null)
   const [selectedRecipeType, setSelectedRecipeType] = useState<'saved' | 'approved'>('saved')
   const [authLoading, setAuthLoading] = useState(true)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const prepDataRef = useRef<PrepPayload | null>(null)
   const initialSessionDoneRef = useRef(false)
 
@@ -220,6 +221,9 @@ function App() {
   const handleSave = (recipe: Dish) => {
     const alreadySaved = savedRecipes.some((r) => r.name === recipe.name)
     if (!alreadySaved) setSavedRecipes((prev) => [...prev, recipe])
+    setSuggestions((prev) => prev.filter((r) => r.name !== recipe.name))
+    setSuccessMessage(`"${recipe.name}" saved for later`)
+    setTimeout(() => setSuccessMessage(null), 3000)
   }
 
   const handleRemoveSaved = (index: number) => {
@@ -233,6 +237,9 @@ function App() {
   const handleApprove = (recipe: Dish) => {
     const alreadyApproved = approvedRecipes.some((r) => r.name === recipe.name)
     if (!alreadyApproved) setApprovedRecipes((prev) => [...prev, recipe])
+    setSuggestions((prev) => prev.filter((r) => r.name !== recipe.name))
+    setSuccessMessage(`"${recipe.name}" approved for today's special!`)
+    setTimeout(() => setSuccessMessage(null), 3000)
   }
 
   const handleRetry = async () => {
@@ -292,6 +299,27 @@ function App() {
         flexDirection: 'column',
       }}
     >
+      {/* Success toast notification */}
+      {successMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '1rem',
+            right: '1rem',
+            padding: '0.75rem 1.25rem',
+            background: 'var(--color-primary)',
+            color: '#fff',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            fontSize: '0.9375rem',
+            fontWeight: 500,
+            zIndex: 1000,
+            animation: 'slideIn 0.3s ease-out',
+          }}
+        >
+          {successMessage}
+        </div>
+      )}
       <AppNav
         currentStep={view === 'input' ? 1 : 2}
         onSignIn={user ? undefined : () => setView('auth')}

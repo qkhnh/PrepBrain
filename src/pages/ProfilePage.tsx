@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import styles from './AuthPage.module.css'
 import { supabase } from '@/lib/supabase'
 import type { CafeProfile } from '@/types/profile'
-import { INGREDIENT_CATEGORIES } from '@/data/Ingredients'
+import { ALL_INGREDIENTS } from '@/data/Ingredients'
 
 interface ProfilePageProps {
   profile: CafeProfile | null
@@ -17,12 +17,9 @@ const EQUIPMENT_OPTIONS = [
 ]
 
 const MENU_CATEGORY_OPTIONS = [
-  'breakfast', 'lunch', 'beverage', 'pastry', 'other',
-]
-
-const INGREDIENT_UNIT_OPTIONS = [
-  'g', 'ml', 'pcs', 'slice', 'cup', 'tbsp', 'tsp', 'kg', 'L',
-  'oz', 'lb', 'fl oz', 'pinch', 'bunch', 'clove', 'whole',
+  'sandwich', 'pastry', 'porridge', 'salad', 'soup', 'toast',
+  'smoothie', 'coffee', 'tea', 'juice', 'cocktail', 'dessert',
+  'breakfast', 'brunch', 'lunch', 'snack', 'other',
 ]
 
 function toTitleCase(s: string): string {
@@ -33,9 +30,10 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
   const [cafeName, setCafeName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedEquipment, setSelectedEquipment] = useState<Set<string>>(new Set())
-  const [menuItems, setMenuItems] = useState<Array<{ name: string; category: string; ingredients: Array<{ name: string; quantity: string; unit: string }> }>>([])
+  const [menuItems, setMenuItems] = useState<Array<{ name: string; category: string; ingredients: string[] }>>([])
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [ingredientSearch, setIngredientSearch] = useState<Record<number, string>>({})
 
   useEffect(() => {
     setCafeName(profile?.cafe_name ?? '')
@@ -55,11 +53,7 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
       setMenuItems(profile.menu_items.map((item) => ({
         name: item.name,
         category: item.category,
-        ingredients: item.ingredients.map((ing) => ({
-          name: ing.name,
-          quantity: ing.quantity.toString(),
-          unit: ing.unit,
-        })),
+        ingredients: item.ingredients,
       })))
     } else {
       setMenuItems([])
@@ -86,16 +80,8 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
     setMenuItems((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)))
   }
 
-  const addIngredient = (menuIndex: number) => {
-    setMenuItems((prev) => prev.map((item, i) => (i === menuIndex ? { ...item, ingredients: [...item.ingredients, { name: '', quantity: '', unit: 'g' }] } : item)))
-  }
-
   const removeIngredient = (menuIndex: number, ingIndex: number) => {
     setMenuItems((prev) => prev.map((item, i) => (i === menuIndex ? { ...item, ingredients: item.ingredients.filter((_, j) => j !== ingIndex) } : item)))
-  }
-
-  const updateIngredient = (menuIndex: number, ingIndex: number, field: 'name' | 'quantity' | 'unit', value: string) => {
-    setMenuItems((prev) => prev.map((item, i) => (i === menuIndex ? { ...item, ingredients: item.ingredients.map((ing, j) => (j === ingIndex ? { ...ing, [field]: value } : ing)) } : item)))
   }
 
   const handleSave = async () => {
@@ -112,11 +98,7 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
       menu_items: menuItems.filter((item) => item.name.trim()).map((item) => ({
         name: item.name.trim(),
         category: item.category,
-        ingredients: item.ingredients.filter((ing) => ing.name.trim()).map((ing) => ({
-          name: ing.name.trim(),
-          quantity: parseFloat(ing.quantity) || 0,
-          unit: ing.unit,
-        })),
+        ingredients: item.ingredients.filter((ing) => ing.trim()),
       })),
       preferences: profile?.preferences ?? { chef_notes_examples: [], avoided_ingredients: [], cuisine_style_tags: [] },
       cuisine_type: profile?.cuisine_type ?? null,
@@ -158,9 +140,9 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div className={styles.inputWrap} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-              <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
                 Cafe name
-              </label>
+              </h3>
               <input
                 type="text"
                 placeholder="e.g. The Corner Cafe"
@@ -171,9 +153,9 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
             </div>
 
             <div className={styles.inputWrap} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-              <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
                 Description
-              </label>
+              </h3>
               <textarea
                 placeholder="Brief description of your cafe and style..."
                 value={description}
@@ -193,9 +175,9 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
             </div>
 
             <div>
-              <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.5rem', display: 'block' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
                 Equipment
-              </label>
+              </h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                 {EQUIPMENT_OPTIONS.map((item) => {
                   const active = selectedEquipment.has(item)
@@ -224,9 +206,9 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
             </div>
 
             <div>
-              <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.5rem', display: 'block' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
                 Current menu items
-              </label>
+              </h3>
               <button
                 type="button"
                 onClick={addMenuItem}
@@ -265,10 +247,11 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
                         onChange={(e) => updateMenuItem(menuIndex, 'name', e.target.value)}
                         style={{
                           width: '100%',
-                          padding: '0.4375rem 0.625rem',
+                          padding: '0.5rem 0.75rem',
                           border: '1px solid var(--color-border)',
-                          borderRadius: 'var(--radius-sm)',
-                          fontSize: '0.8125rem',
+                          borderRadius: 'var(--radius-md)',
+                          fontSize: '0.875rem',
+                          fontWeight: 600,
                           fontFamily: 'inherit',
                         }}
                       />
@@ -277,10 +260,11 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
                       value={item.category}
                       onChange={(e) => updateMenuItem(menuIndex, 'category', e.target.value)}
                       style={{
-                        padding: '0.4375rem 0.625rem',
+                        padding: '0.5rem 0.75rem',
                         border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        fontSize: '0.8125rem',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
                         fontFamily: 'inherit',
                         background: 'var(--color-bg-card)',
                       }}
@@ -311,101 +295,114 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-                    {item.ingredients.map((ing, ingIndex) => (
-                      <div key={ingIndex} style={{ display: 'flex', gap: '0.375rem' }}>
-                        <select
-                          value={ing.name}
-                          onChange={(e) => updateIngredient(menuIndex, ingIndex, 'name', e.target.value)}
-                          style={{
-                            flex: 2,
-                            padding: '0.3125rem 0.4375rem',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-sm)',
-                            fontSize: '0.75rem',
-                            fontFamily: 'inherit',
+                    {/* Search input */}
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        placeholder="Search ingredients..."
+                        value={ingredientSearch[menuIndex] ?? ''}
+                        onChange={(e) => setIngredientSearch(prev => ({ ...prev, [menuIndex]: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '0.3125rem 0.4375rem',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: '0.75rem',
+                          fontFamily: 'inherit',
+                          marginBottom: '0.25rem',
+                        }}
+                      />
+                      
+                      {/* Filtered suggestions */}
+                      {(ingredientSearch[menuIndex]?.trim() ?? '') && (() => {
+                        const query = ingredientSearch[menuIndex].toLowerCase().trim()
+                        const filtered = ALL_INGREDIENTS.filter(ing => 
+                          ing.name.toLowerCase().includes(query) && !item.ingredients.includes(ing.name.toLowerCase())
+                        ).slice(0, 6)
+                        return filtered.length > 0 ? (
+                          <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
                             background: 'var(--color-bg-card)',
-                          }}
-                        >
-                          <option value="">Select ingredient...</option>
-                          {INGREDIENT_CATEGORIES.map((cat) => (
-                            <optgroup key={cat.id} label={cat.label}>
-                              {cat.items.map((itemName) => (
-                                <option key={itemName} value={itemName.toLowerCase()}>
-                                  {itemName}
-                                </option>
-                              ))}
-                            </optgroup>
-                          ))}
-                        </select>
-                        <input
-                          type="number"
-                          placeholder="Qty"
-                          value={ing.quantity}
-                          onChange={(e) => updateIngredient(menuIndex, ingIndex, 'quantity', e.target.value)}
-                          min={0}
-                          step={0.1}
-                          style={{
-                            flex: 0.5,
-                            padding: '0.3125rem 0.4375rem',
                             border: '1px solid var(--color-border)',
                             borderRadius: 'var(--radius-sm)',
-                            fontSize: '0.75rem',
-                            fontFamily: 'inherit',
-                          }}
-                        />
-                        <select
-                          value={ing.unit}
-                          onChange={(e) => updateIngredient(menuIndex, ingIndex, 'unit', e.target.value)}
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            zIndex: 10,
+                            maxHeight: '200px',
+                            overflowY: 'auto',
+                          }}>
+                            {filtered.map(ing => (
+                              <button
+                                key={ing.name}
+                                type="button"
+                                onClick={() => {
+                                  setMenuItems(prev => prev.map((itm, i) => 
+                                    i === menuIndex ? { ...itm, ingredients: [...itm.ingredients, ing.name.toLowerCase()] } : itm
+                                  ))
+                                  setIngredientSearch(prev => ({ ...prev, [menuIndex]: '' }))
+                                }}
+                                style={{
+                                  display: 'block',
+                                  width: '100%',
+                                  padding: '0.3125rem 0.4375rem',
+                                  border: 'none',
+                                  background: 'transparent',
+                                  textAlign: 'left',
+                                  fontSize: '0.75rem',
+                                  fontFamily: 'inherit',
+                                  cursor: 'pointer',
+                                  color: 'var(--color-text)',
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                              >
+                                {ing.name}
+                              </button>
+                            ))}
+                          </div>
+                        ) : null
+                      })()}
+                    </div>
+                    
+                    {/* Selected ingredients as tags */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                      {item.ingredients.map((ing, ingIndex) => (
+                        <span
+                          key={ingIndex}
                           style={{
-                            flex: 0.75,
-                            padding: '0.3125rem 0.4375rem',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-sm)',
-                            fontSize: '0.75rem',
-                            fontFamily: 'inherit',
-                            background: 'var(--color-bg-card)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.375rem 0.625rem',
+                            background: 'var(--color-primary)',
+                            color: '#fff',
+                            borderRadius: 'var(--radius-md)',
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
                           }}
                         >
-                          {INGREDIENT_UNIT_OPTIONS.map((unit) => (
-                            <option key={unit} value={unit}>
-                              {unit}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeIngredient(menuIndex, ingIndex)}
-                          style={{
-                            padding: '0.3125rem 0.4375rem',
-                            borderRadius: 'var(--radius-sm)',
-                            border: '1px solid var(--color-warning)',
-                            background: 'transparent',
-                            color: 'var(--color-warning)',
-                            fontSize: '0.6875rem',
-                            fontFamily: 'inherit',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => addIngredient(menuIndex)}
-                      style={{
-                        padding: '0.3125rem 0.625rem',
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1px dashed var(--color-border)',
-                        background: 'transparent',
-                        color: 'var(--color-text-secondary)',
-                        fontSize: '0.6875rem',
-                        fontFamily: 'inherit',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      + Add ingredient
-                    </button>
+                          {ing}
+                          <button
+                            type="button"
+                            onClick={() => removeIngredient(menuIndex, ingIndex)}
+                            style={{
+                              border: 'none',
+                              background: 'transparent',
+                              color: '#fff',
+                              padding: 0,
+                              cursor: 'pointer',
+                              fontSize: '0.875rem',
+                              lineHeight: 1,
+                              opacity: 0.8,
+                            }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}

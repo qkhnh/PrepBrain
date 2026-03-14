@@ -21,8 +21,6 @@ export interface Dish {
   equipmentRequired: string[]
   wasteScore: number
   portionsToClear: number
-  rationale: string
-  offMenuNote?: string
   /** Optional step-by-step instructions from backend/LLM; when set, shown instead of generated steps */
   instructions?: string[]
 }

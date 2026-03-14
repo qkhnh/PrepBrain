@@ -8,7 +8,7 @@ export interface PantryStaple {
 export interface MenuItem {
   name: string
   category: string
-  ingredients: { name: string; quantity: number; unit: string }[]
+  ingredients: string[]
 }
 
 export interface CafeProfile {

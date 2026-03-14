@@ -62,7 +62,6 @@ export function RecipeDetailView({ recipe, type, onBack }: RecipeDetailViewProps
         <DishSuggestionCard
           dishName={recipe.name}
           description={recipe.description}
-          offMenuNote={recipe.offMenuNote}
         />
 
         <section style={{ marginBottom: '1.5rem' }}>
@@ -122,31 +121,6 @@ export function RecipeDetailView({ recipe, type, onBack }: RecipeDetailViewProps
 
         <IngredientTagList ingredients={recipe.ingredients} />
         <ReasonSection dish={recipe} />
-
-        {recipe.rationale && (
-          <section>
-            <h3
-              style={{
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                color: 'var(--color-text)',
-                margin: '0 0 0.75rem',
-              }}
-            >
-              Rationale
-            </h3>
-            <p
-              style={{
-                fontSize: '0.9375rem',
-                color: 'var(--color-text-muted)',
-                margin: 0,
-                lineHeight: 1.6,
-              }}
-            >
-              {recipe.rationale}
-            </p>
-          </section>
-        )}
       </div>
     </div>
   )

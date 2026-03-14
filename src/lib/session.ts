@@ -7,6 +7,20 @@ import type { CafeProfile } from '@/types/profile'
 const DEFAULT_EQUIPMENT = ['stovetop', 'oven', 'grill', 'blender', 'fryer']
 const DEFAULT_PANTRY = ['olive oil', 'salt', 'pepper', 'garlic', 'onion', 'butter', 'flour', 'stock']
 
+// Extract unique ingredient names from menu items
+function extractMenuIngredients(menuItems?: CafeProfile['menu_items']): Set<string> {
+  const ingredients = new Set<string>()
+  if (!menuItems) return ingredients
+  for (const item of menuItems) {
+    for (const ing of item.ingredients) {
+      if (ing) {
+        ingredients.add(ing.toLowerCase())
+      }
+    }
+  }
+  return ingredients
+}
+
 // ── buildPrompt ────────────────────────────────────────────────────────────────
 
 export function buildPrompt(
@@ -15,9 +29,13 @@ export function buildPrompt(
   profile?: CafeProfile | null
 ): string {
   const equipment = (profile?.equipment?.length ? profile.equipment : DEFAULT_EQUIPMENT).join(', ')
-  const pantry = profile?.pantry_staples?.length
-    ? profile.pantry_staples.map((p) => p.name).join(', ')
-    : DEFAULT_PANTRY.join(', ')
+  
+  // Merge default pantry with ingredients from menu items
+  const menuIngredients = extractMenuIngredients(profile?.menu_items ?? undefined)
+  const defaultPantry = new Set(DEFAULT_PANTRY.map(p => p.toLowerCase()))
+  const allAvailable = new Set([...defaultPantry, ...menuIngredients])
+  const availableIngredients = Array.from(allAvailable).sort().join(', ')
+  
   const ingredientList = ingredients
     .map((i) => `- ${i.name}${i.qty ? ` (${i.qty}${i.unit ? ' ' + i.unit : ''})` : ''}${i.atRisk ? ' [AT RISK - prioritize using this]' : ''}`)
     .join('\n')
@@ -26,7 +44,7 @@ export function buildPrompt(
   const menuItemsFormatted = profile?.menu_items?.length
     ? profile.menu_items.map((item) => {
         const ingredientsStr = item.ingredients.length > 0
-          ? item.ingredients.map((ing) => `${ing.name} (${ing.quantity}${ing.unit})`).join(', ')
+          ? item.ingredients.join(', ')
           : 'no specific ingredients listed'
         return `  - ${item.name} [${item.category}]: ${ingredientsStr}`
       }).join('\n')
@@ -53,12 +71,12 @@ export function buildPrompt(
 Create exactly 3 creative off-menu dish suggestions that:
 1. Use the available leftover ingredients (prioritize items marked [AT RISK])
 2. Match the cafe's style and equipment capabilities
-3. Can be prepared with available pantry staples
+3. Can be prepared with available ingredients (pantry staples and ingredients from existing menu)
 4. Are different from existing menu items but complement the menu style
 
 === CAFE PROFILE ===
 ${profileContext}AVAILABLE EQUIPMENT: ${equipment}
-PANTRY STAPLES: ${pantry}${menuItemsSection}
+AVAILABLE INGREDIENTS: ${availableIngredients}${menuItemsSection}
 === TODAY'S LEFTOVER INGREDIENTS ===
 ${ingredientList}${chefNotesSection}
 === OUTPUT REQUIREMENTS ===
@@ -70,9 +88,7 @@ Output format (exactly 3 objects in array):
     "name": "Dish Name",
     "description": "Brief description of the dish",
     "ingredients": [{"name": "ingredient", "quantity": 1, "unit": "pcs"}],
-    "equipmentRequired": ["stovetop"],
-    "rationale": "Why this dish works",
-    "offMenuNote": "Off-menu special — use while supplies last."
+    "equipmentRequired": ["stovetop"]
   }
 ]
 
@@ -84,7 +100,6 @@ Now generate the JSON array:`
 function mockCallLLM(_prompt: string, ingredients: SubmittedIngredient[]): Dish[] {
   const names = ingredients.map((i) => i.name)
   const first = names[0] ?? 'vegetables'
-  const second = names[1] ?? 'herbs'
   const nameStr = names.slice(0, 3).join(', ')
 
   return [
@@ -100,8 +115,6 @@ function mockCallLLM(_prompt: string, ingredients: SubmittedIngredient[]): Dish[
       equipmentRequired: ['stovetop'],
       wasteScore: 0,
       portionsToClear: 0,
-      rationale: `Uses your at-risk ${first} and ${second} as the centrepiece. Minimal prep, fast service.`,
-      offMenuNote: 'Off-menu special — use while supplies last.',
     },
     {
       name: `Kitchen Frittata`,
@@ -115,8 +128,6 @@ function mockCallLLM(_prompt: string, ingredients: SubmittedIngredient[]): Dish[
       equipmentRequired: ['stovetop', 'oven'],
       wasteScore: 0,
       portionsToClear: 0,
-      rationale: `A frittata is the most efficient way to clear multiple at-risk ingredients in one pan.`,
-      offMenuNote: 'Off-menu special — use while supplies last.',
     },
     {
       name: `Chef's Seasonal Bowl`,
@@ -130,8 +141,6 @@ function mockCallLLM(_prompt: string, ingredients: SubmittedIngredient[]): Dish[
       equipmentRequired: ['stovetop'],
       wasteScore: 0,
       portionsToClear: 0,
-      rationale: `Bowl format lets you scale up or down with whatever quantity is left of each ingredient.`,
-      offMenuNote: 'Off-menu special — use while supplies last.',
     },
   ]
 }
@@ -226,8 +235,6 @@ interface RawDish {
   description?: string
   ingredients?: Array<{ name?: string; quantity?: number; unit?: string }>
   equipmentRequired?: string[]
-  rationale?: string
-  offMenuNote?: string
 }
 
 function normalizeDish(raw: RawDish): Dish {
@@ -244,8 +251,6 @@ function normalizeDish(raw: RawDish): Dish {
     equipmentRequired: Array.isArray(raw.equipmentRequired) ? raw.equipmentRequired.map(String) : ['stovetop'],
     wasteScore: 0,
     portionsToClear: 0,
-    rationale: String(raw.rationale ?? ''),
-    offMenuNote: raw.offMenuNote != null ? String(raw.offMenuNote) : undefined,
   }
 }
 

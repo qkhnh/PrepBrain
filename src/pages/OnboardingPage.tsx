@@ -2,7 +2,7 @@ import { useState } from 'react'
 import styles from './AuthPage.module.css'
 import { supabase } from '@/lib/supabase'
 import type { CafeProfile } from '@/types/profile'
-import { INGREDIENT_CATEGORIES } from '@/data/Ingredients'
+import { ALL_INGREDIENTS } from '@/data/Ingredients'
 
 interface OnboardingPageProps {
   userId: string
@@ -20,23 +20,21 @@ const CUISINE_STYLE_OPTIONS = [
 ]
 
 const MENU_CATEGORY_OPTIONS = [
-  'breakfast', 'lunch', 'beverage', 'pastry', 'other',
-]
-
-const INGREDIENT_UNIT_OPTIONS = [
-  'g', 'ml', 'pcs', 'slice', 'cup', 'tbsp', 'tsp', 'kg', 'L',
-  'oz', 'lb', 'fl oz', 'pinch', 'bunch', 'clove', 'whole',
+  'sandwich', 'pastry', 'porridge', 'salad', 'soup', 'toast',
+  'smoothie', 'coffee', 'tea', 'juice', 'cocktail', 'dessert',
+  'breakfast', 'brunch', 'lunch', 'snack', 'other',
 ]
 
 export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
   const [step, setStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [ingredientSearch, setIngredientSearch] = useState<Record<number, string>>({})
 
   // Step 1 — Identity
   const [cafeName, setCafeName] = useState('')
   const [cuisineType, setCuisineType] = useState('')
-  const [seatingCapacity, setSeatingCapacity] = useState('')
+  const [description, setDescription] = useState('')
 
   // Step 2 — Equipment
   const [selectedEquipment, setSelectedEquipment] = useState<Set<string>>(new Set())
@@ -46,7 +44,7 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
   const [avoidedIngredients, setAvoidedIngredients] = useState('')
 
   // Step 4 — Menu Items
-  const [menuItems, setMenuItems] = useState<Array<{ name: string; category: string; ingredients: Array<{ name: string; quantity: string; unit: string }> }>>([])
+  const [menuItems, setMenuItems] = useState<Array<{ name: string; category: string; ingredients: string[] }>>([])
 
   const toggleEquipment = (item: string) => {
     setSelectedEquipment((prev) => {
@@ -76,16 +74,8 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
     setMenuItems((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)))
   }
 
-  const addIngredient = (menuIndex: number) => {
-    setMenuItems((prev) => prev.map((item, i) => (i === menuIndex ? { ...item, ingredients: [...item.ingredients, { name: '', quantity: '', unit: 'g' }] } : item)))
-  }
-
   const removeIngredient = (menuIndex: number, ingIndex: number) => {
     setMenuItems((prev) => prev.map((item, i) => (i === menuIndex ? { ...item, ingredients: item.ingredients.filter((_, j) => j !== ingIndex) } : item)))
-  }
-
-  const updateIngredient = (menuIndex: number, ingIndex: number, field: 'name' | 'quantity' | 'unit', value: string) => {
-    setMenuItems((prev) => prev.map((item, i) => (i === menuIndex ? { ...item, ingredients: item.ingredients.map((ing, j) => (j === ingIndex ? { ...ing, [field]: value } : ing)) } : item)))
   }
 
   const handleFinish = async () => {
@@ -96,18 +86,14 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
       user_id: userId,
       cafe_name: cafeName || null,
       cuisine_type: cuisineType || null,
-      seating_capacity: seatingCapacity ? parseInt(seatingCapacity) : null,
-      description: null,
+      description: description.trim() || null,
+      seating_capacity: null,
       equipment: Array.from(selectedEquipment).map((e) => e.toLowerCase()),
       pantry_staples: [],
       menu_items: menuItems.filter((item) => item.name.trim()).map((item) => ({
         name: item.name.trim(),
         category: item.category,
-        ingredients: item.ingredients.filter((ing) => ing.name.trim()).map((ing) => ({
-          name: ing.name.trim(),
-          quantity: parseFloat(ing.quantity) || 0,
-          unit: ing.unit,
-        })),
+        ingredients: item.ingredients.filter((ing) => ing.trim()),
       })),
       preferences: {
         chef_notes_examples: [],
@@ -181,13 +167,18 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
                 />
               </div>
               <div className={styles.inputWrap}>
-                <input
-                  type="number"
-                  placeholder="Seating capacity"
-                  value={seatingCapacity}
-                  onChange={(e) => setSeatingCapacity(e.target.value)}
-                  min={1}
-                  style={{ paddingLeft: '1rem' }}
+                <textarea
+                  placeholder="Describe your cafe (e.g. A cozy brunch spot with focus on fresh, local ingredients...)"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  style={{ 
+                    paddingLeft: '1rem', 
+                    paddingTop: '0.75rem',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                    fontSize: '0.9375rem',
+                  }}
                 />
               </div>
             </div>
@@ -312,8 +303,9 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
                           width: '100%',
                           padding: '0.5rem 0.75rem',
                           border: '1px solid var(--color-border)',
-                          borderRadius: 'var(--radius-sm)',
+                          borderRadius: 'var(--radius-md)',
                           fontSize: '0.875rem',
+                          fontWeight: 600,
                           fontFamily: 'inherit',
                         }}
                       />
@@ -324,8 +316,9 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
                       style={{
                         padding: '0.5rem 0.75rem',
                         border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-sm)',
+                        borderRadius: 'var(--radius-md)',
                         fontSize: '0.875rem',
+                        fontWeight: 600,
                         fontFamily: 'inherit',
                         background: 'var(--color-bg-card)',
                       }}
@@ -359,101 +352,115 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
                     <p style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--color-text-muted)', margin: 0 }}>
                       Ingredients
                     </p>
-                    {item.ingredients.map((ing, ingIndex) => (
-                      <div key={ingIndex} style={{ display: 'flex', gap: '0.5rem' }}>
-                        <select
-                          value={ing.name}
-                          onChange={(e) => updateIngredient(menuIndex, ingIndex, 'name', e.target.value)}
-                          style={{
-                            flex: 2,
-                            padding: '0.375rem 0.5rem',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-sm)',
-                            fontSize: '0.8125rem',
-                            fontFamily: 'inherit',
+                    
+                    {/* Search input */}
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        placeholder="Search ingredients..."
+                        value={ingredientSearch[menuIndex] ?? ''}
+                        onChange={(e) => setIngredientSearch(prev => ({ ...prev, [menuIndex]: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '0.375rem 0.5rem',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: '0.8125rem',
+                          fontFamily: 'inherit',
+                          marginBottom: '0.25rem',
+                        }}
+                      />
+                      
+                      {/* Filtered suggestions */}
+                      {(ingredientSearch[menuIndex]?.trim() ?? '') && (() => {
+                        const query = ingredientSearch[menuIndex].toLowerCase().trim()
+                        const filtered = ALL_INGREDIENTS.filter(ing => 
+                          ing.name.toLowerCase().includes(query) && !item.ingredients.includes(ing.name.toLowerCase())
+                        ).slice(0, 6)
+                        return filtered.length > 0 ? (
+                          <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
                             background: 'var(--color-bg-card)',
-                          }}
-                        >
-                          <option value="">Select ingredient...</option>
-                          {INGREDIENT_CATEGORIES.map((cat) => (
-                            <optgroup key={cat.id} label={cat.label}>
-                              {cat.items.map((itemName) => (
-                                <option key={itemName} value={itemName.toLowerCase()}>
-                                  {itemName}
-                                </option>
-                              ))}
-                            </optgroup>
-                          ))}
-                        </select>
-                        <input
-                          type="number"
-                          placeholder="Qty"
-                          value={ing.quantity}
-                          onChange={(e) => updateIngredient(menuIndex, ingIndex, 'quantity', e.target.value)}
-                          min={0}
-                          step={0.1}
-                          style={{
-                            flex: 0.5,
-                            padding: '0.375rem 0.5rem',
                             border: '1px solid var(--color-border)',
                             borderRadius: 'var(--radius-sm)',
-                            fontSize: '0.8125rem',
-                            fontFamily: 'inherit',
-                          }}
-                        />
-                        <select
-                          value={ing.unit}
-                          onChange={(e) => updateIngredient(menuIndex, ingIndex, 'unit', e.target.value)}
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            zIndex: 10,
+                            maxHeight: '200px',
+                            overflowY: 'auto',
+                          }}>
+                            {filtered.map(ing => (
+                              <button
+                                key={ing.name}
+                                type="button"
+                                onClick={() => {
+                                  setMenuItems(prev => prev.map((itm, i) => 
+                                    i === menuIndex ? { ...itm, ingredients: [...itm.ingredients, ing.name.toLowerCase()] } : itm
+                                  ))
+                                  setIngredientSearch(prev => ({ ...prev, [menuIndex]: '' }))
+                                }}
+                                style={{
+                                  display: 'block',
+                                  width: '100%',
+                                  padding: '0.375rem 0.5rem',
+                                  border: 'none',
+                                  background: 'transparent',
+                                  textAlign: 'left',
+                                  fontSize: '0.8125rem',
+                                  fontFamily: 'inherit',
+                                  cursor: 'pointer',
+                                  color: 'var(--color-text)',
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                              >
+                                {ing.name}
+                              </button>
+                            ))}
+                          </div>
+                        ) : null
+                      })()}
+                    </div>
+                    
+                    {/* Selected ingredients as tags */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                      {item.ingredients.map((ing, ingIndex) => (
+                        <span
+                          key={ingIndex}
                           style={{
-                            flex: 0.75,
-                            padding: '0.375rem 0.5rem',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-sm)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.375rem 0.625rem',
+                            background: 'var(--color-primary)',
+                            color: '#fff',
+                            borderRadius: 'var(--radius-md)',
                             fontSize: '0.8125rem',
-                            fontFamily: 'inherit',
-                            background: 'var(--color-bg-card)',
+                            fontWeight: 500,
                           }}
                         >
-                          {INGREDIENT_UNIT_OPTIONS.map((unit) => (
-                            <option key={unit} value={unit}>
-                              {unit}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeIngredient(menuIndex, ingIndex)}
-                          style={{
-                            padding: '0.375rem 0.5rem',
-                            borderRadius: 'var(--radius-sm)',
-                            border: '1px solid var(--color-warning)',
-                            background: 'transparent',
-                            color: 'var(--color-warning)',
-                            fontSize: '0.75rem',
-                            fontFamily: 'inherit',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => addIngredient(menuIndex)}
-                      style={{
-                        padding: '0.375rem 0.75rem',
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1px dashed var(--color-border)',
-                        background: 'transparent',
-                        color: 'var(--color-text-secondary)',
-                        fontSize: '0.75rem',
-                        fontFamily: 'inherit',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      + Add ingredient
-                    </button>
+                          {ing}
+                          <button
+                            type="button"
+                            onClick={() => removeIngredient(menuIndex, ingIndex)}
+                            style={{
+                              border: 'none',
+                              background: 'transparent',
+                              color: '#fff',
+                              padding: 0,
+                              cursor: 'pointer',
+                              fontSize: '0.875rem',
+                              lineHeight: 1,
+                              opacity: 0.8,
+                            }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}
