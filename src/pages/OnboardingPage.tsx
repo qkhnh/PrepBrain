@@ -2,6 +2,7 @@ import { useState } from 'react'
 import styles from './AuthPage.module.css'
 import { supabase } from '@/lib/supabase'
 import type { CafeProfile } from '@/types/profile'
+import { INGREDIENT_CATEGORIES } from '@/data/Ingredients'
 
 interface OnboardingPageProps {
   userId: string
@@ -360,9 +361,7 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
                     </p>
                     {item.ingredients.map((ing, ingIndex) => (
                       <div key={ingIndex} style={{ display: 'flex', gap: '0.5rem' }}>
-                        <input
-                          type="text"
-                          placeholder="Ingredient name"
+                        <select
                           value={ing.name}
                           onChange={(e) => updateIngredient(menuIndex, ingIndex, 'name', e.target.value)}
                           style={{
@@ -372,8 +371,20 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
                             borderRadius: 'var(--radius-sm)',
                             fontSize: '0.8125rem',
                             fontFamily: 'inherit',
+                            background: 'var(--color-bg-card)',
                           }}
-                        />
+                        >
+                          <option value="">Select ingredient...</option>
+                          {INGREDIENT_CATEGORIES.map((cat) => (
+                            <optgroup key={cat.id} label={cat.label}>
+                              {cat.items.map((itemName) => (
+                                <option key={itemName} value={itemName.toLowerCase()}>
+                                  {itemName}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                        </select>
                         <input
                           type="number"
                           placeholder="Qty"

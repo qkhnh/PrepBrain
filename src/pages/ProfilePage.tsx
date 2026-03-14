@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import styles from './AuthPage.module.css'
 import { supabase } from '@/lib/supabase'
 import type { CafeProfile } from '@/types/profile'
+import { INGREDIENT_CATEGORIES } from '@/data/Ingredients'
 
 interface ProfilePageProps {
   profile: CafeProfile | null
@@ -312,9 +313,7 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
                     {item.ingredients.map((ing, ingIndex) => (
                       <div key={ingIndex} style={{ display: 'flex', gap: '0.375rem' }}>
-                        <input
-                          type="text"
-                          placeholder="Ingredient"
+                        <select
                           value={ing.name}
                           onChange={(e) => updateIngredient(menuIndex, ingIndex, 'name', e.target.value)}
                           style={{
@@ -324,8 +323,20 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
                             borderRadius: 'var(--radius-sm)',
                             fontSize: '0.75rem',
                             fontFamily: 'inherit',
+                            background: 'var(--color-bg-card)',
                           }}
-                        />
+                        >
+                          <option value="">Select ingredient...</option>
+                          {INGREDIENT_CATEGORIES.map((cat) => (
+                            <optgroup key={cat.id} label={cat.label}>
+                              {cat.items.map((itemName) => (
+                                <option key={itemName} value={itemName.toLowerCase()}>
+                                  {itemName}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                        </select>
                         <input
                           type="number"
                           placeholder="Qty"

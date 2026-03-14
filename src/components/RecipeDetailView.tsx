@@ -1,6 +1,7 @@
 import type { Dish } from '@/types/suggestion'
 import { DishSuggestionCard } from '@/components/DishSuggestionCard'
 import { IngredientTagList } from '@/components/IngredientTagList'
+import { ReasonSection } from '@/components/ReasonSection'
 
 interface RecipeDetailViewProps {
   recipe: Dish
@@ -119,19 +120,8 @@ export function RecipeDetailView({ recipe, type, onBack }: RecipeDetailViewProps
           </div>
         </section>
 
-        <section style={{ marginBottom: '1.5rem' }}>
-          <h3
-            style={{
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: 'var(--color-text)',
-              margin: '0 0 0.75rem',
-            }}
-          >
-            Ingredients
-          </h3>
-          <IngredientTagList ingredients={recipe.ingredients} />
-        </section>
+        <IngredientTagList ingredients={recipe.ingredients} />
+        <ReasonSection dish={recipe} />
 
         {recipe.rationale && (
           <section>
