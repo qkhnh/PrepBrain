@@ -1,4 +1,5 @@
 import type { Dish, OutputStatus } from '@/types/suggestion'
+import { supabase } from '@/lib/supabase'
 import { ResultHeader } from '@/components/ResultHeader'
 import { DishSuggestionCard } from '@/components/DishSuggestionCard'
 import { IngredientTagList } from '@/components/IngredientTagList'
@@ -72,6 +73,22 @@ function ScoreSection({ dish }: { dish: Dish }) {
   )
 }
 
+async function saveSuggestionToDB(dish: Dish) {
+  const { error } = await supabase
+    .from('suggestions')
+    .insert([
+      {
+        dish_name: dish.name,
+        description: dish.description,
+      }
+    ]);
+  if (error) {
+    alert('Failed to save suggestion: ' + error.message);
+  } else {
+    alert('Suggestion saved!');
+  }
+}
+
 function RecipeCard({
   dish,
   onSave,
@@ -102,7 +119,7 @@ function RecipeCard({
       <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button
           type="button"
-          onClick={() => onSave?.(dish)}
+          onClick={() => saveSuggestionToDB(dish)}
           style={{
             padding: '0.5rem 1rem',
             fontSize: '0.9375rem',

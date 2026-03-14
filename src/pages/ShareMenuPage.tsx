@@ -1,6 +1,13 @@
 import { useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
 import type { Dish } from '@/types/suggestion'
 import styles from './ShareMenuPage.module.css'
+
+// Initialize Supabase client
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
 
 interface Props {
   savedRecipes: Dish[]
@@ -49,25 +56,37 @@ export default function ShareMenuPage({
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('/api/menu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cafeId,
-          selectedDishes: selected.map((d, i) => ({
-            name:              d.name,
-            description:       d.description,
-            ingredientsUsed:   d.ingredients.map(ing => ing.name),
-            equipmentNeeded:   d.equipmentRequired,
-            wasteScore:        d.wasteScore,
-            portionsToClear:   d.portionsToClear,
-            llm_rank:          i + 1,
-          })),
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Failed to share. Please try again.'); return }
-      setShareResult({ menuId: data.menuId, shareUrl: data.customerUrl })
+      // 1. Insert into menus table to get menu_id
+      const { data: menuData, error: menuError } = await supabase
+        .from('menus')
+        .insert([{ cafe_id: cafeId, status: 'voting' }])
+        .select('id')
+        .single();
+      if (menuError || !menuData) {
+        setError(menuError?.message || 'Failed to create menu.');
+        setLoading(false);
+        return;
+      }
+      const menu_id = menuData.id;
+      // 2. Insert 3 dishes into menu_items with this menu_id
+      const rows = selected.map((d) => ({
+        menu_id,
+        cafe_id: cafeId,
+        dish_name: d.name,
+        description: d.description,
+        ingredients_used: d.ingredients.map(ing => ing.name),
+        equipment_required: d.equipmentRequired,
+        waste_score: d.wasteScore,
+        portions_to_clear: d.portionsToClear,
+        thumbs_up: 0,
+        thumbs_down: 0,
+      }))
+      const { error: supaError } = await supabase.from('menu_items').insert(rows)
+      if (supaError) {
+        setError(supaError.message || 'Failed to share. Please try again.');
+        return;
+      }
+      setShareResult({ menuId: menu_id, shareUrl: `/customer/${menu_id}` })
     } catch {
       setError('Network error. Please check your connection.')
     } finally {
