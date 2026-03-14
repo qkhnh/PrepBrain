@@ -67,6 +67,12 @@
   overflow-x: auto;
   padding-bottom: 4px;
   scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.tabs:active {
+  cursor: grabbing;
 }
 
 .tabs::-webkit-scrollbar {

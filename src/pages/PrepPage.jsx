@@ -90,8 +90,7 @@ export default function PrepPage({ onSubmit }) {
         <p className={styles.eyebrow}>PrepBrain · Morning Prep</p>
         <h1 className={styles.title}>What's in the kitchen?</h1>
         <p className={styles.subtitle}>
-          Tap ingredients to select them. Flag anything at-risk and we'll
-          prioritise it in the suggestion.
+          Tap ingredients to select. Flag at-risk items and we'll prioritise them in the suggestion.
         </p>
       </div>
 

@@ -1,0 +1,142 @@
+/* Header: minimal soft green background, no pattern */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 1.5rem;
+  border-bottom: 0.5px solid var(--color-border-light);
+  background: var(--color-nav-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.leftSlot,
+.rightSlot {
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+
+.rightSlot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+/* Stepper: wider container, centered; responsive spacing and label area */
+.stepsWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 16px);
+}
+
+/* Connecting line scales with viewport for balanced spacing on wide screens */
+.stepLine {
+  width: clamp(48px, 10vw, 120px);
+  height: 2px;
+  background: var(--color-border);
+}
+
+.stepLabels {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  max-width: min(320px, 90vw);
+  box-sizing: border-box;
+  padding: 0 4px;
+}
+
+/* Labels wrap cleanly; no clipping; enough width per step */
+.stepLabel {
+  font-size: clamp(10px, 1.2vw, 12px);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  min-width: 80px;
+  max-width: 140px;
+  text-align: center;
+  line-height: 1.3;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Larger step circles so stepper doesn’t look too small */
+.step {
+  width: clamp(28px, 3.2vw, 34px);
+  height: clamp(28px, 3.2vw, 34px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(12px, 1.4vw, 14px);
+  font-weight: 600;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-secondary);
+  background: transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.stepActive {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: #fff;
+}
+
+.stepDone {
+  background: #E1F5EE;
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+
+.signInBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-primary-dark);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.signInBtn:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.signInIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signInIcon svg {
+  display: block;
+}

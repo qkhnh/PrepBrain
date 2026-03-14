@@ -1,21 +1,28 @@
-import { useState, useMemo } from "react";
-import { INGREDIENT_CATEGORIES, ALL_INGREDIENTS } from "../data/ingredients";
+import { useState, useMemo, useRef } from "react";
+import { INGREDIENT_CATEGORIES, ALL_INGREDIENTS, FEATURED_INGREDIENT_NAMES } from "../data/ingredients";
 import styles from "./IngredientSelector.module.css";
 
 const UNITS = ["g", "kg", "ml", "L", "pcs", "cups", "bunch", "slice"];
+const FEATURED_SET = new Set(FEATURED_INGREDIENT_NAMES);
 
 export default function IngredientSelector({ selected, atRiskSet, onToggle, onToggleRisk, onUpdateQty, onUpdateUnit }) {
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCategory, setActiveCategory] = useState("featured");
   const [showTray, setShowTray] = useState(false);
+  const tabsRef = useRef(null);
+  const dragStartXRef = useRef(null);
+  const dragStartScrollRef = useRef(0);
+  const isDraggingRef = useRef(false);
 
   const selectedCount = Object.keys(selected).length;
 
-  // Filter ingredients by search + category
+  // Filter ingredients by search + category (featured = popular only)
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     return ALL_INGREDIENTS.filter(({ name, category }) => {
-      const matchCat = activeCategory === "all" || category === activeCategory;
+      const matchCat = activeCategory === "featured"
+        ? FEATURED_SET.has(name)
+        : category === activeCategory;
       const matchSearch = !q || name.toLowerCase().includes(q);
       return matchCat && matchSearch;
     });
@@ -23,7 +30,36 @@ export default function IngredientSelector({ selected, atRiskSet, onToggle, onTo
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
-    setActiveCategory("all");
+    setActiveCategory("featured");
+  };
+
+  const handleTabsMouseDown = (e) => {
+    if (!tabsRef.current) return;
+    dragStartXRef.current = e.clientX;
+    dragStartScrollRef.current = tabsRef.current.scrollLeft;
+    isDraggingRef.current = false;
+  };
+
+  const handleTabsMouseMove = (e) => {
+    if (dragStartXRef.current == null || !tabsRef.current) return;
+    const dx = e.clientX - dragStartXRef.current;
+    tabsRef.current.scrollLeft = dragStartScrollRef.current - dx;
+    isDraggingRef.current = true;
+  };
+
+  const handleTabsMouseUp = () => {
+    dragStartXRef.current = null;
+    setTimeout(() => { isDraggingRef.current = false; }, 0);
+  }
+
+  const handleTabClick = (categoryId, e) => {
+    if (isDraggingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    setActiveCategory(categoryId);
+    setSearch("");
   };
 
   return (
@@ -46,19 +82,31 @@ export default function IngredientSelector({ selected, atRiskSet, onToggle, onTo
         </div>
       </div>
 
-      {/* Category tabs */}
-      <div className={styles.tabs}>
+      {/* Category tabs (scrollable with mouse drag) */}
+      <div
+        ref={tabsRef}
+        className={styles.tabs}
+        role="tablist"
+        onMouseDown={handleTabsMouseDown}
+        onMouseMove={handleTabsMouseMove}
+        onMouseUp={handleTabsMouseUp}
+        onMouseLeave={handleTabsMouseUp}
+      >
         <button
-          className={`${styles.tab} ${activeCategory === "all" ? styles.tabActive : ""}`}
-          onClick={() => { setActiveCategory("all"); setSearch(""); }}
+          role="tab"
+          type="button"
+          className={`${styles.tab} ${activeCategory === "featured" ? styles.tabActive : ""}`}
+          onClick={(e) => handleTabClick("featured", e)}
         >
-          All
+          Featured
         </button>
         {INGREDIENT_CATEGORIES.map((cat) => (
           <button
             key={cat.id}
+            role="tab"
+            type="button"
             className={`${styles.tab} ${activeCategory === cat.id ? styles.tabActive : ""}`}
-            onClick={() => { setActiveCategory(cat.id); setSearch(""); }}
+            onClick={(e) => handleTabClick(cat.id, e)}
           >
             {cat.icon} {cat.label}
           </button>

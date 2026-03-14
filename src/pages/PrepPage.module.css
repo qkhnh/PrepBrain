@@ -40,6 +40,9 @@
   color: #6B6860;
   line-height: 1.6;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Voice row ───────────────────────────────────── */
