@@ -1,8 +1,14 @@
 import { useRef } from "react";
 import styles from "./VoiceInput.module.css";
 
-export default function VoiceInput({ onTranscript, listening, setListening }) {
-  const recognitionRef = useRef(null);
+interface VoiceInputProps {
+  onTranscript: (text: string) => void;
+  listening: boolean;
+  setListening: (v: boolean) => void;
+}
+
+export default function VoiceInput({ onTranscript, listening, setListening }: VoiceInputProps) {
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   const toggle = () => {
     const SpeechRecognition =
@@ -26,7 +32,7 @@ export default function VoiceInput({ onTranscript, listening, setListening }) {
     rec.interimResults = false;
     rec.lang = "en-AU";
 
-    rec.onresult = (e) => {
+    rec.onresult = (e: SpeechRecognitionEvent) => {
       const text = e.results[0][0].transcript;
       onTranscript(text);
       setListening(false);

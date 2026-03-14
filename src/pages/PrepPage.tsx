@@ -2,7 +2,7 @@ import { useState } from "react";
 import IngredientSelector from "../components/IngredientSelector";
 import type { SelectedMap } from "../components/IngredientSelector";
 import VoiceInput from "../components/VoiceInput";
-import { ALL_INGREDIENTS } from "../data/ingredients";
+import { ALL_INGREDIENTS } from "../data/Ingredients";
 import { parseVoiceInput, matchToIngredients } from "../lib/parseVoiceInput";
 import type { MatchedIngredient, Unit } from "../lib/parseVoiceInput";
 import styles from "./PrepPage.module.css";
