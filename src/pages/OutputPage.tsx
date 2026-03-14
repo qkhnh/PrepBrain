@@ -96,7 +96,7 @@ function RecipeCard({
       />
       <ScoreSection dish={dish} />
       <IngredientTagList ingredients={dish.ingredients} />
-      <ReasonSection rationale={dish.rationale} />
+      <ReasonSection dish={dish} />
       <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button
           type="button"
