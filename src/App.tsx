@@ -16,9 +16,33 @@ import { LandingPage } from '@/pages/LandingPage'
 import { runSession } from '@/lib/session'
 import { RecipeDetailView } from '@/components/RecipeDetailView'
 import ShareMenuPage from '@/pages/ShareMenuPage'
+import Cookies from 'js-cookie'
+
 
 
 type AppView = 'landing' | 'input' | 'output' | 'auth' | 'onboarding' | 'profile' | 'recipe-detail' | 'share-menu'
+const COOKIE_OPTS = { expires: 7 } // persist for 7 days
+ 
+function readCookie<T>(key: string, fallback: T): T {
+  try {
+    const raw = Cookies.get(key)
+    return raw ? (JSON.parse(raw) as T) : fallback
+  } catch {
+    return fallback
+  }
+}
+ 
+function writeCookie<T>(key: string, value: T): void {
+  try {
+    Cookies.set(key, JSON.stringify(value), COOKIE_OPTS)
+  } catch {
+    // Cookie may exceed 4KB limit with large recipe lists — silent fail
+  }
+}
+ 
+function clearCookie(key: string): void {
+  Cookies.remove(key)
+}
 
 async function fetchProfile(userId: string): Promise<CafeProfile | null> {
   console.log('[FETCH_PROFILE] Starting fetch for user:', userId)
@@ -66,10 +90,21 @@ async function fetchProfile(userId: string): Promise<CafeProfile | null> {
 function App() {
   const [view, setView] = useState<AppView>('landing')
   const [status, setStatus] = useState<OutputStatus>('success')
-  const [suggestions, setSuggestions] = useState<Dish[]>([])
+  // const [suggestions, setSuggestions] = useState<Dish[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [savedRecipes, setSavedRecipes] = useState<Dish[]>([])
-  const [approvedRecipes, setApprovedRecipes] = useState<Dish[]>([])
+  // const [savedRecipes, setSavedRecipes] = useState<Dish[]>(() => readCookie<Dish[]>('prepbrain-saved', []))
+  const [savedRecipes, setSavedRecipesRaw] = useState<Dish[]>(() =>
+    readCookie<Dish[]>('prepbrain-saved', [])
+  )
+
+  // const [approvedRecipes, setApprovedRecipes] = useState<Dish[]>([])
+  const [approvedRecipes, setApprovedRecipesRaw] = useState<Dish[]>(() =>
+    readCookie<Dish[]>('prepbrain-approved', [])
+  )
+  const [suggestions, setSuggestionsRaw] = useState<Dish[]>(() =>
+    readCookie<Dish[]>('prepbrain-suggestions', [])
+  )
+
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<CafeProfile | null>(null)
   const [selectedRecipe, setSelectedRecipe] = useState<Dish | null>(null)
@@ -77,6 +112,32 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [profileFetchLoading, setProfileFetchLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  const setSavedRecipes = (val: Dish[] | ((prev: Dish[]) => Dish[])) => {
+    setSavedRecipesRaw(prev => {
+      const next = typeof val === 'function' ? val(prev) : val
+      writeCookie('prepbrain-saved', next)
+      return next
+    })
+  }
+ 
+  const setApprovedRecipes = (val: Dish[] | ((prev: Dish[]) => Dish[])) => {
+    setApprovedRecipesRaw(prev => {
+      const next = typeof val === 'function' ? val(prev) : val
+      writeCookie('prepbrain-approved', next)
+      return next
+    })
+  }
+ 
+  const setSuggestions = (val: Dish[] | ((prev: Dish[]) => Dish[])) => {
+    setSuggestionsRaw(prev => {
+      const next = typeof val === 'function' ? val(prev) : val
+      writeCookie('prepbrain-suggestions', next)
+      return next
+    })
+  }
+
+
   const prepDataRef = useRef<PrepPayload | null>(null)
   const initialSessionDoneRef = useRef(false)
 
