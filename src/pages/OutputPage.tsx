@@ -116,6 +116,12 @@ function RecipeCard({
   const [showAdjustModal, setShowAdjustModal] = useState(false)
   const [scalePortions, setScalePortions] = useState(1)
   const [scaledIngredients, setScaledIngredients] = useState<DishIngredient[]>(dish.ingredients)
+  const [showCommunityPrompt, setShowCommunityPrompt] = useState(false)
+
+  const handleApprove = () => {
+    onApprove?.(dish)
+    setShowCommunityPrompt(true)
+  }
 
   const handleSaveIngredients = (ingredients: DishIngredient[]) => {
     const updatedDish: Dish = {
@@ -199,7 +205,7 @@ function RecipeCard({
         </button>
         <button
           type="button"
-          onClick={() => onApprove?.(dish)}
+          onClick={handleApprove}
           style={{
             padding: '0.5rem 1rem',
             fontSize: '0.9375rem',
@@ -229,6 +235,26 @@ function RecipeCard({
           {LABEL_ADJUST}
         </button>
       </div>
+      
+      {/* Community prompt after approval */}
+      {showCommunityPrompt && (
+        <p style={{
+          marginTop: '1rem',
+          fontSize: '0.875rem',
+          color: 'var(--color-text-muted)',
+          lineHeight: 1.5,
+        }}>
+          Ready to see if your community would try this?{' '}
+          <a
+            href="https://wouldyoutry.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--color-primary)', fontWeight: 500 }}
+          >
+            Share it on Would You Try? →
+          </a>
+        </p>
+      )}
       
       <AdjustModal
         isOpen={showAdjustModal}

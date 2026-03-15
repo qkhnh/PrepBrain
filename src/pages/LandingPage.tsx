@@ -10,14 +10,14 @@ export function LandingPage({ onSignIn }: LandingPageProps) {
       <div className={styles.left}>
         <div className={styles.card} style={{ maxWidth: '480px' }}>
           <p style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', margin: '0 0 0.5rem' }}>
-            PrepBrain
+            Would You Try? Create
           </p>
           <h1 className={styles.title} style={{ fontSize: '2rem' }}>
             Your leftovers, one dish
           </h1>
           <p className={styles.subtitle} style={{ marginBottom: '1.5rem' }}>
             Enter what you have and get off-menu dish suggestions for your brunch or cafe. 
-            PrepBrain helps you reduce waste and create daily specials from ingredients at risk.
+            Would You Try? Create helps you reduce waste and create daily specials from ingredients at risk.
           </p>
           <button
             type="button"
@@ -37,6 +37,10 @@ export function LandingPage({ onSignIn }: LandingPageProps) {
         <div className={styles.panelCard}>
           <p className={styles.panelTitle}>Tailored to your kitchen</p>
           <p className={styles.panelText}>Set up your cafe profile once — equipment, style, preferences — and get suggestions that fit.</p>
+        </div>
+        <div className={styles.panelCard}>
+          <p className={styles.panelTitle}>Your community is waiting</p>
+          <p className={styles.panelText}>Every dish you create can go live on Would You Try? — where customers vote before you commit to cooking it.</p>
         </div>
       </div>
     </div>

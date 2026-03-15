@@ -23,11 +23,26 @@
 }
 
 .logo {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 26px;
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.01em;
+}
+
+.logoSub {
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  margin-top: 0.25rem;
+}
+
+.logoSub:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
 }
 
 /* Stepper: wider container, centered; responsive spacing and label area */

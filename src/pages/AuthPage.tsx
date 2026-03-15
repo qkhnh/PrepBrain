@@ -111,8 +111,8 @@ export function AuthPage({ onBack, onSuccess }: AuthPageProps) {
       <div className={styles.left}>
         <div className={styles.card}>
           <div className={styles.backRow}>
-            <button type="button" className={styles.backBtn} onClick={onBack} aria-label="Back to PrepBrain">
-              <BackIcon /> Back to PrepBrain
+            <button type="button" className={styles.backBtn} onClick={onBack} aria-label="Back to Would You Try? Create">
+              <BackIcon /> Back
             </button>
             {mode === 'signup' ? (
               <span className={styles.toggleLink}>
@@ -129,7 +129,7 @@ export function AuthPage({ onBack, onSuccess }: AuthPageProps) {
           <p className={styles.subtitle}>
             {mode === 'signup'
               ? 'Create an account to save recipes and get suggestions.'
-              : 'Welcome back to PrepBrain.'}
+              : 'Welcome back to Would You Try? Create.'}
           </p>
 
           <form className={styles.form} onSubmit={handleSubmit}>

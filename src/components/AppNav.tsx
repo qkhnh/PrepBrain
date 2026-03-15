@@ -11,7 +11,15 @@ export function AppNav({ currentStep, onSignIn, onSignOut, userName }: AppNavPro
   return (
     <nav className={styles.nav}>
       <div className={styles.leftSlot}>
-        <span className={styles.logo}>PrepBrain</span>
+        <span className={styles.logo}>Would You Try? Create</span>
+        <a
+          href="https://wouldyoutry.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.logoSub}
+        >
+          Part of the Would You Try? community
+        </a>
       </div>
       <div className={styles.stepsWrap}>
         <div className={styles.steps}>

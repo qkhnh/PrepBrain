@@ -141,7 +141,7 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
               {step === 1 && 'Tell us a bit about your cafe so we can tailor suggestions.'}
               {step === 2 && 'Select the equipment available in your kitchen.'}
               {step === 3 && 'Help us avoid ingredients you don\'t want and focus on your style.'}
-              {step === 4 && 'Add your current menu items to help us suggest complementary dishes.'}
+              {step === 4 && 'Add your menu to help us suggest complementary dishes.'}
             </p>
           </div>
 
@@ -541,7 +541,7 @@ export function OnboardingPage({ userId, onComplete }: OnboardingPageProps) {
       <div className={styles.right}>
         <div className={styles.panelCard}>
           <p className={styles.panelTitle}>Set up once, use every day</p>
-          <p className={styles.panelText}>Your cafe profile helps PrepBrain suggest dishes that match your kitchen and style.</p>
+          <p className={styles.panelText}>Your cafe profile helps Would You Try? Create suggest dishes that match your kitchen and style.</p>
         </div>
         <div className={styles.panelCard}>
           <p className={styles.panelTagline}>Edit any time</p>

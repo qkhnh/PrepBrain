@@ -1,7 +1,7 @@
 /* Sidebar: same soft green as nav, no pattern; cards stay white for contrast */
 .sidebar {
-  width: 240px;
-  min-width: 240px;
+  width: 280px;
+  min-width: 280px;
   min-height: 0;
   align-self: stretch;
   background: var(--color-nav-bg);
@@ -185,4 +185,17 @@
 .shareBtn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.trendingLink {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.trendingLink:hover {
+  text-decoration: underline;
 }

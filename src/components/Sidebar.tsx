@@ -115,12 +115,22 @@ export function Sidebar({
 
       {/* ── NEW: Share to customers ─────────────────────────────────────────── */}
       <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Share with customers</h2>
+        <h2 className={styles.sectionTitle}>Would You Try? Community</h2>
 
         {totalRecommended === 0 ? (
-          <p className={styles.empty}>
-            No recommendations yet. Generate suggestions first, then share them with your customers.
-          </p>
+          <>
+            <p className={styles.empty}>
+              Your dish goes live. Customers vote. You cook what they want.
+            </p>
+            <a
+              href="https://wouldyoutry.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.trendingLink}
+            >
+              See what's trending on Would You Try? →
+            </a>
+          </>
         ) : (
           <>
             <p className={styles.shareDescription}>
@@ -137,6 +147,14 @@ export function Sidebar({
               <ShareIcon />
               Choose 3 to share →
             </button>
+            <a
+              href="https://wouldyoutry.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.trendingLink}
+            >
+              See what's trending on Would You Try? →
+            </a>
           </>
         )}
       </div>

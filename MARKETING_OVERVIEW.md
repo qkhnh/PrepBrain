@@ -1,8 +1,8 @@
-# PrepBrain - Marketing Overview
+# Would You Try? Create - Marketing Overview
 
 ## Product Summary
 
-**PrepBrain** is an AI-powered kitchen assistant designed for cafes, brunch spots, and small restaurants. It helps chefs create daily specials from leftover ingredients, reducing food waste while maximizing profitability.
+**Would You Try? Create** is an AI-powered kitchen assistant designed for cafes, brunch spots, and small restaurants. It helps chefs create daily specials from leftover ingredients, reducing food waste while maximizing profitability.
 
 ---
 
@@ -18,17 +18,17 @@
 ## Key Features
 
 ### 🎤 Voice-Powered Ingredient Entry
-Hands-free input during busy morning prep. Simply speak your ingredients and quantities — "500 grams of tomatoes, 3 avocados, 200 grams of bacon" — and PrepBrain automatically selects them.
+Hands-free input during busy morning prep. Simply speak your ingredients and quantities — "500 grams of tomatoes, 3 avocados, 200 grams of bacon" — and Would You Try? Create automatically selects them.
 
 ### 🤖 AI-Generated Dish Suggestions
-Powered by GLM-4 AI, PrepBrain generates 3 creative off-menu dish ideas tailored to:
+Powered by GLM-4 AI, Would You Try? Create generates 3 creative off-menu dish ideas tailored to:
 - Your cafe's cuisine style
 - Available kitchen equipment
 - Existing menu items
 - Ingredients at risk of spoiling
 
 ### ⚠️ At-Risk Ingredient Prioritization
-Mark ingredients that need to be used today. PrepBrain prioritizes these in its suggestions and calculates a **Waste Score** showing how effectively each dish uses at-risk items.
+Mark ingredients that need to be used today. Would You Try? Create prioritizes these in its suggestions and calculates a **Waste Score** showing how effectively each dish uses at-risk items.
 
 ### 📊 Smart Portion Calculator
 Automatically estimates how many portions can be made from available ingredients, helping you plan for the day.
@@ -86,7 +86,7 @@ Set up once and get tailored suggestions:
 
 ## Competitive Advantage
 
-| Feature | PrepBrain | Competitors |
+| **Feature** | Would You Try? Create | Competitors |
 |---------|-----------|-------------|
 | Voice input | ✅ | ❌ |
 | At-risk prioritization | ✅ | ❌ |
@@ -134,6 +134,12 @@ Set up once and get tailored suggestions:
 2. **"Morning prep, simplified"** — Less thinking, more cooking
 3. **"AI that knows your kitchen"** — Tailored to your equipment and style
 4. **"Never lose a great idea"** — Save what works, reuse it later
+
+---
+
+## Brand Name
+
+**Would You Try? Create** — A name that invites curiosity and creativity. It asks the question every chef considers when experimenting with new dishes, while "Create" emphasizes the generative, AI-powered aspect of the tool.
 
 ---
 

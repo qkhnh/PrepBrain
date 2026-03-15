@@ -129,11 +129,10 @@ export default function PrepPage({ onSubmit }: Props) {
 
       {/* Header */}
       <div className={styles.header}>
-        <p className={styles.eyebrow}>Morning Prep · Today's Kitchen</p>
+        <p className={styles.eyebrow}>Morning Prep · Today's Community Dish</p>
         <h1 className={styles.title}>What's in the kitchen?</h1>
         <p className={styles.subtitle}>
-          Select your leftover ingredients below. Flag anything at-risk and
-          PrepBrain will prioritise it when generating today's special.
+          What's left in the kitchen today? Flag anything at-risk — we'll turn it into something your community will actually want to try.
         </p>
       </div>
 
@@ -238,7 +237,7 @@ export default function PrepPage({ onSubmit }: Props) {
           ? `Generate today's special — ${selectedCount} ingredient${
               selectedCount !== 1 ? "s" : ""
             } selected →`
-          : "Select ingredients to continue"}
+          : "Create something worth trying →"}
       </button>
     </div>
   );

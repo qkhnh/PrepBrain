@@ -45,15 +45,15 @@ function clearCookie(key: string): void {
 
 // ── CHANGE 1: profile cookie helpers ─────────────────────────────────────────
 function readProfileCookie(): CafeProfile | null {
-  return readCookie<CafeProfile | null>('prepbrain-profile', null)
+  return readCookie<CafeProfile | null>('wyt-create-profile', null)
 }
 
 function writeProfileCookie(p: CafeProfile): void {
-  writeCookie('prepbrain-profile', p)
+  writeCookie('wyt-create-profile', p)
 }
 
 function clearProfileCookie(): void {
-  clearCookie('prepbrain-profile')
+  clearCookie('wyt-create-profile')
 }
 
 // ── CHANGE 2: fetchProfile now accepts cached fallback + timeout increased to 30s
@@ -108,13 +108,13 @@ function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const [savedRecipes, setSavedRecipesRaw] = useState<Dish[]>(() =>
-    readCookie<Dish[]>('prepbrain-saved', [])
+    readCookie<Dish[]>('wyt-create-saved', [])
   )
   const [approvedRecipes, setApprovedRecipesRaw] = useState<Dish[]>(() =>
-    readCookie<Dish[]>('prepbrain-approved', [])
+    readCookie<Dish[]>('wyt-create-approved', [])
   )
   const [suggestions, setSuggestionsRaw] = useState<Dish[]>(() =>
-    readCookie<Dish[]>('prepbrain-suggestions', [])
+    readCookie<Dish[]>('wyt-create-suggestions', [])
   )
 
   const [user, setUser] = useState<User | null>(null)
@@ -140,7 +140,7 @@ function App() {
   const setSavedRecipes = (val: Dish[] | ((prev: Dish[]) => Dish[])) => {
     setSavedRecipesRaw(prev => {
       const next = typeof val === 'function' ? val(prev) : val
-      writeCookie('prepbrain-saved', next)
+      writeCookie('wyt-create-saved', next)
       return next
     })
   }
@@ -148,7 +148,7 @@ function App() {
   const setApprovedRecipes = (val: Dish[] | ((prev: Dish[]) => Dish[])) => {
     setApprovedRecipesRaw(prev => {
       const next = typeof val === 'function' ? val(prev) : val
-      writeCookie('prepbrain-approved', next)
+      writeCookie('wyt-create-approved', next)
       return next
     })
   }
@@ -156,7 +156,7 @@ function App() {
   const setSuggestions = (val: Dish[] | ((prev: Dish[]) => Dish[])) => {
     setSuggestionsRaw(prev => {
       const next = typeof val === 'function' ? val(prev) : val
-      writeCookie('prepbrain-suggestions', next)
+      writeCookie('wyt-create-suggestions', next)
       return next
     })
   }
@@ -298,9 +298,9 @@ function App() {
     setSavedRecipes([])
     setApprovedRecipes([])
     setSuggestions([])
-    clearCookie('prepbrain-saved')
-    clearCookie('prepbrain-approved')
-    clearCookie('prepbrain-suggestions')
+    clearCookie('wyt-create-saved')
+    clearCookie('wyt-create-approved')
+    clearCookie('wyt-create-suggestions')
     clearProfileCookie()
     setView('landing')
   }

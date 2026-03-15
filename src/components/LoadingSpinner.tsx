@@ -9,7 +9,7 @@ export function LoadingSpinner({ status }: LoadingSpinnerProps) {
   return (
     <div className={styles.container}>
       <div className={styles.spinner}></div>
-      <p className={styles.text}>Loading PrepBrain...</p>
+      <p className={styles.text}>Loading Would You Try? Create...</p>
       {status && <p className={styles.statusText}>{status}</p>}
     </div>
   )

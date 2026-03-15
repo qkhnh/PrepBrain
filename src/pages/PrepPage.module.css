@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
 .page {
   max-width: 680px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -27,7 +27,7 @@
 }
 
 .title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 32px;
   font-weight: 700;
   color: #1C1F1A;
@@ -95,7 +95,7 @@
   border: 1px solid #E0DED8;
   border-radius: 8px;
   font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   color: #2C2C2A;
   background: #FAFAF8;
   resize: vertical;
@@ -130,7 +130,7 @@
   color: #FAFAF8;
   font-size: 15px;
   font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   letter-spacing: 0.02em;
   cursor: not-allowed;
   transition: background 0.2s, transform 0.1s;

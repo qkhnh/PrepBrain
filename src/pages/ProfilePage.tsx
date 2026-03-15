@@ -123,8 +123,8 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.left}>
-        <div className={styles.card}>
+      <div className={styles.left} style={{ flex: '1 1 100%', maxWidth: '100%' }}>
+        <div className={styles.card} style={{ maxWidth: '800px' }}>
           <div className={styles.backRow}>
             <button type="button" className={styles.backBtn} onClick={onBack} aria-label="Back">
               <BackIcon /> Back
@@ -135,45 +135,56 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
             {(cafeName.trim() || profile?.cafe_name || 'Cafe')} Profile
           </h1>
           <p className={styles.subtitle}>
-            Update your cafe name, description, equipment, and current menu items.
+            Update your cafe name, description, equipment, and your menu.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div className={styles.inputWrap} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
-                Cafe name
-              </h3>
-              <input
-                type="text"
-                placeholder="e.g. The Corner Cafe"
-                value={cafeName}
-                onChange={(e) => setCafeName(e.target.value)}
-                style={{ paddingLeft: '1rem' }}
-              />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Row 1: Cafe name and Description side by side */}
+            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 300px', minWidth: '200px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
+                  Cafe name
+                </h3>
+                <input
+                  type="text"
+                  placeholder="e.g. The Corner Cafe"
+                  value={cafeName}
+                  onChange={(e) => setCafeName(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '0.9375rem',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+              <div style={{ flex: '2 1 400px', minWidth: '200px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
+                  Description
+                </h3>
+                <textarea
+                  placeholder="Brief description of your cafe and style..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={2}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    fontFamily: 'inherit',
+                    fontSize: '0.9375rem',
+                    resize: 'vertical',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
             </div>
 
-            <div className={styles.inputWrap} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
-                Description
-              </h3>
-              <textarea
-                placeholder="Brief description of your cafe and style..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)',
-                  fontFamily: 'inherit',
-                  fontSize: '0.9375rem',
-                  resize: 'vertical',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-
+            {/* Row 2: Equipment */}
             <div>
               <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
                 Equipment
@@ -207,7 +218,7 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
 
             <div>
               <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
-                Current menu items
+                Your menu
               </h3>
               <button
                 type="button"
@@ -429,12 +440,6 @@ export function ProfilePage({ profile, userId, onBack, onSaved }: ProfilePagePro
               {saving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
-        </div>
-      </div>
-      <div className={styles.right}>
-        <div className={styles.panelCard}>
-          <p className={styles.panelTitle}>Better suggestions</p>
-          <p className={styles.panelText}>Your equipment and description help PrepBrain tailor dish suggestions to your kitchen.</p>
         </div>
       </div>
     </div>
